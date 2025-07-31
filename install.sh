@@ -2,26 +2,25 @@
 
 set -e
 
-REPO_URL="https://raw.githubusercontent.com/onoureldin14/omar-homebrew/main"
+SOURCE_DIR="$(cd "$(dirname "$0")" && pwd)/aliases"
 CACHE_DIR="$HOME/.dotfiles"
-CONFIG_FILE="$HOME/.zshrc"  # Change to ~/.bashrc if needed
+CONFIG_FILE="$HOME/.zshrc"  # Change this to ~/.bashrc if needed
 
-echo "📁 Creating local dotfiles directory at $CACHE_DIR"
+echo "📁 Syncing local aliases to $CACHE_DIR..."
 mkdir -p "$CACHE_DIR"
 
-echo "⬇️  Downloading alias and helper scripts..."
-curl -fsSL "$REPO_URL/aliases/terraform_aliases.sh" -o "$CACHE_DIR/terraform_aliases.sh"
-curl -fsSL "$REPO_URL/aliases/terragrunt_aliases.sh" -o "$CACHE_DIR/terragrunt_aliases.sh"
-curl -fsSL "$REPO_URL/aliases/kubectl_aliases.sh" -o "$CACHE_DIR/kubectl_aliases.sh"
-curl -fsSL "$REPO_URL/aliases/azdo_done.sh" -o "$CACHE_DIR/azdo_done.sh"
+for file in "$SOURCE_DIR"/*.sh; do
+  filename=$(basename "$file")
+  echo "   - Installing $filename"
+  cp "$file" "$CACHE_DIR/$filename"
+  chmod +x "$CACHE_DIR/$filename"
+done
 
-chmod +x "$CACHE_DIR/azdo_done.sh"
-
-# Add sources to config file if missing
+# Add source lines if not present
 add_source_if_missing() {
   local file="$1"
   local line="source ~/.dotfiles/$file"
-  if ! grep -qF "$line" "$CONFIG_FILE"; then
+  if ! grep -Fxq "$line" "$CONFIG_FILE"; then
     echo "$line" >> "$CONFIG_FILE"
     echo "✅ Added $line to $CONFIG_FILE"
   else
@@ -29,25 +28,25 @@ add_source_if_missing() {
   fi
 }
 
-echo "🔧 Updating your $CONFIG_FILE"
+echo "🔧 Updating your shell config: $CONFIG_FILE"
 echo -e "\n# Added by omar-homebrew install" >> "$CONFIG_FILE"
-add_source_if_missing "terraform_aliases.sh"
-add_source_if_missing "terragrunt_aliases.sh"
-add_source_if_missing "kubectl_aliases.sh"
-add_source_if_missing "azdo_done.sh"
+for file in "$CACHE_DIR"/*.sh; do
+  filename=$(basename "$file")
+  add_source_if_missing "$filename"
+done
 
-# Check for jq and pre-commit
-for dep in jq pre-commit; do
-  if ! command -v "$dep" >/dev/null 2>&1; then
-    echo "⚠️  $dep not found. Attempting install via Homebrew..."
+# Optional tools
+for tool in jq pre-commit; do
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    echo "[INFO] Installing missing dependency: $tool"
     if command -v brew >/dev/null 2>&1; then
-      brew install "$dep"
+      brew install "$tool"
     else
-      echo "❌ Homebrew is not installed. Please install $dep manually."
+      echo "❌ $tool not found and Homebrew is not available. Please install it manually."
     fi
   fi
 done
 
-echo -e "\n✅ Installation complete."
-echo "Run this to load the changes now:"
-echo "  source $CONFIG_FILE"
+echo -e "\n✅ Local install complete."
+echo "➡️  Run this to apply aliases now:"
+echo "   source $CONFIG_FILE"

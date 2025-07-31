@@ -1,0 +1,1 @@
+alias sts='aws sts get-caller-identity'
