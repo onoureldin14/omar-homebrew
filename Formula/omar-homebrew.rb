@@ -3,7 +3,7 @@ class OmarHomebrew < Formula
     homepage "https://github.com/onoureldin14/omar-homebrew"
     url "https://github.com/onoureldin14/omar-homebrew/archive/refs/heads/main.zip"
     version "1.0.0"
-    sha256 "39f773a5be86a5818d8d76ba6c4c346ea84371b61b9fa31a93d6236f873bc18a"
+    sha256 "b55cccaeb8b773749a81ebcba5d6ed63c5c6b6a3faf21cc7b42bc2817400dd88"
   
     def install
       bin.install "install.sh"
@@ -13,7 +13,7 @@ class OmarHomebrew < Formula
   
     def caveats
       <<~EOS
-        ✅ Aliases and functions installed.
+        ✅ Developer aliases and azdo-done have been installed.
   
         To apply them now, run:
           source ~/.zshrc
